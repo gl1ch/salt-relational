@@ -1,0 +1,20 @@
+{%- set hostname=grains['id'] %}
+USER_LANGUAGE="{{ pillar['service-ossec']['language'] }}"
+USER_NO_STOP="y"
+{%- if 'ossec.server' in pillar['servers'][hostname]['roles'] %}
+USER_INSTALL_TYPE="server"
+USER_EMAIL_SMTP="{{ pillar['resources']['smtp'] }}"
+{%- else %}
+USER_INSTALL_TYPE="agent"
+USER_AGENT_SERVER_IP="{{ pillar['service-ossec']['server_ip'] }}"
+{%- endif %}
+USER_DIR="{{ pillar['service-ossec']['userdir'] }}"
+USER_DELETE_DIR="y"
+USER_ENABLE_ACTIVE_RESPONSE="{{ pillar['service-ossec']['en_active_response'] }}"
+USER_ENABLE_SYSCHECK="{{ pillar['service-ossec']['en_syscheck'] }}"
+USER_ENABLE_ROOTCHECK="{{ pillar['service-ossec']['en_rootcheck'] }}"
+USER_UPDATE_RULES="{{ pillar['service-ossec']['en_update_rules'] }}"
+USER_ENABLE_EMAIL="{{ pillar['service-ossec']['en_email'] }}"
+USER_EMAIL_ADDRESS="{{ pillar['service-ossec']['email_address'] }}"
+USER_ENABLE_SYSLOG="{{ pillar['service-ossec']['en_syslog'] }}"
+USER_WHITE_LIST="{{ pillar['service-ossec']['white-list'] }}"
