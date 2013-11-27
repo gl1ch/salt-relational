@@ -1,0 +1,54 @@
+{% set hostname=grains['id'] -%}
+
+# This file is managed by Saltstack. Please configure from the Master server.
+
+*filter
+
+# Drop any traffic not explicitly allowed in the rules below.
+:INPUT DROP
+:FORWARD DROP
+:OUTPUT ACCEPT
+
+# Allow all loopback (lo0) traffic
+-A INPUT -i lo -j ACCEPT
+
+# Drop all traffic to 127/8 that doesn't use lo0
+-A INPUT ! -i lo -d 127.0.0.0/8 -j DROP
+
+# Accept inbound traffic for already established connections.
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Effectively allow all outbound traffic.
+-A OUTPUT -j ACCEPT
+
+# Allow ping
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+
+# Allow connection to the services running on this server.
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+
+{%- if pillar['servers'][hostname] is defined %}
+{%- if pillar['servers'][hostname]['tcp_ports'] is defined %}
+{%- for port in pillar['servers'][hostname]['tcp_ports'] %}
+-A INPUT -p tcp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+
+{%- if pillar['servers'][hostname] is defined -%}
+{%- if pillar['servers'][hostname]['udp_ports'] is defined -%}
+{%- for port in pillar['servers'][hostname]['udp_ports'] %}
+-A INPUT -p udp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+
+# Reject all other inbound - default deny unless explicitly allowed policy:
+#-A INPUT -j REJECT
+#-A FORWARD -j REJECT
+
+COMMIT
+
+## If the firewall needs to be disabled, run the following command:
+##
+## iptables-save | sed "/-/d;/^#/d;s/DROP/ACCEPT/" | iptables-restore

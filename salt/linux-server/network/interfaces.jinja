@@ -1,0 +1,27 @@
+{% set hostname=grains['id'] -%}
+
+# This file is managed by Saltstack. Please configure from the Master server.
+
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto {{ pillar['servers'][hostname]['network_adapters']|join(' ') }}
+{%- for adapter, args in pillar['servers'][hostname]['network_adapters'].iteritems() %}
+iface {{ adapter }} inet static
+	address {{ args['ip'] }}
+	netmask {{ args['sn'] }}
+	network {{ args['nw'] }}
+	broadcast {{ args['bc'] }}
+        {%- if adapter == pillar['servers'][hostname]['gwdev'] %}
+	gateway {{ pillar['servers'][hostname]['gateway'] }}
+	# dns-* options are implemented by the resolvconf package, if installed
+	dns-nameservers {{ pillar['servers'][hostname]['dns']|join(' ') }}
+	dns-search {{ pillar['servers'][hostname]['domain'] }}
+	dns-domain {{ pillar['servers'][hostname]['domain'] }}
+        {%- endif %}
+{% endfor %}
