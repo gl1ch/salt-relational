@@ -1,0 +1,68 @@
+# This file is managed by Saltstack. Please configure from the Master server.
+
+<Directory {{ pillar['service-apache']['document_root'] }}/{{ website }}>
+    Options Indexes FollowSymLinks MultiViews
+
+    Order allow,deny
+    {%- if pillar['websites'][website]['allowed'] is defined %}
+    {%- for allowed in pillar['websites'][website]['allowed'] %}
+    Allow from {{ allowed }}
+    {%- endfor %}
+    {%- else %}
+    Allow from 127.0.0.1
+    {%- endif %}
+
+{%- if pillar['websites'][website]['auth'] is defined %}
+{%- if pillar['websites'][website]['auth'] == 'group' %}
+    AuthType Basic
+    {% if pillar['websites'][website]['auth-name'] is defined -%}
+    AuthName "{{ pillar['websites'][website]['auth-name'] }}"
+    {%- else %}
+    AuthName "Secured Web Site"
+    {%- endif %}
+    AuthPAM_Enabled on
+    AuthPAM_FallThrough on
+    AuthGROUP_Enabled on
+    AuthGROUP_FallThrough on
+    AuthBasicAuthoritative off
+    {% if pillar['websites'][website]['group'] is defined -%}
+    {% set count=pillar['websites'][website]['group']|length -%}
+    {% if count == 1 -%}
+    Require group "{{ pillar['websites'][website]['group']|join('"') }}
+    {% elif count > 1 -%}
+    Require group "{{ pillar['websites'][website]['group']|join('" "') }}" 
+    {%- else %}
+    Require group "Domain Admins"
+    {%- endif %}
+    {%- endif %}
+{%- endif %}
+{%- endif %}
+</Directory>
+
+{% if pillar['websites'][website]['ssl'] == False or pillar['websites'][website]['ssl'] is not defined %}
+<VirtualHost {{ pillar['websites'][website]['ip'] }}:80>
+    ServerName          {{ pillar['websites'][website]['sitename'] }}
+    ServerAlias         {{ pillar['websites'][website]['sitealias']|join(' ') }}
+    RewriteEngine on
+    RewriteCond         %{HTTP_HOST} !^{{ pillar['websites'][website]['sitename'] }} [NC]
+    RewriteRule         ^/(.*) http://{{ pillar['websites'][website]['sitename'] }}/$1 [L,R]
+    DocumentRoot        {{ pillar['service-apache']['document_root'] }}/{{ website }}
+</VirtualHost>
+{%- endif %}
+
+{%- if pillar['websites'][website]['ssl'] == True %}
+<VirtualHost {{ pillar['websites'][website]['ip'] }}:80>
+    ServerName          {{ pillar['websites'][website]['sitename'] }}
+    ServerAlias         {{ pillar['websites'][website]['sitealias']|join(' ') }}
+    RedirectMatch       permanent (.*) https://{{ pillar['websites'][website]['sitename'] }}$1
+</VirtualHost>
+
+<VirtualHost {{ pillar['websites'][website]['ip'] }}:443>
+    ServerName              {{ pillar['websites'][website]['sitename'] }}
+    DocumentRoot            {{ pillar['service-apache']['document_root'] }}/{{ website }}
+
+    SSLEngine               on
+    SSLCertificateFile      {{ pillar['service-apache']['ssl_root'] }}/{{ website }}.pem
+    SSLCertificateKeyFile   {{ pillar['service-apache']['ssl_root'] }}/{{ website }}.key-nopass
+</VirtualHost>
+{%- endif %}
