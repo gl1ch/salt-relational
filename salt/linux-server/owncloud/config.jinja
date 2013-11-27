@@ -1,0 +1,27 @@
+<?php
+# This file is managed by Saltstack. Please configure from the Master server.
+$CONFIG = array (
+  'instanceid' => '{{ pillar['service-owncloud']['oc_insanceid'] }}',
+  'passwordsalt' => '{{ pillar['service-owncloud']['oc_passwordsalt'] }}',
+  'datadirectory' => '{{ pillar['service-owncloud']['oc_datadirectory'] }}',
+  'dbtype' => '{{ pillar['service-owncloud']['oc_dbtype'] }}',
+  'version' => '{{ pillar['service-owncloud']['oc_version'] }}',
+  'dbname' => '{{ pillar['service-owncloud']['oc_dbname'] }}',
+  'dbhost' => '{{ pillar['service-owncloud']['oc_dbhost'] }}',
+  'dbtableprefix' => 'oc_',
+  'dbuser' => '{{ pillar['service-owncloud']['oc_dbuser'] }}',
+  'dbpassword' => '{{ pillar['service-owncloud']['oc_dbpassword'] }}',
+  'theme' => '{{ pillar['service-owncloud']['oc_theme'] }}',
+  'mail_smtpmode' => '{{ pillar['service-owncloud']['oc_mail_smtpmode'] }}',
+  'mail_smtphost' => '{{ pillar['service-owncloud']['oc_mail_smtphost'] }}',
+  'mail_smtpauth' => {{ pillar['service-owncloud']['oc_mail_smtpauth'] }},
+  'installed' => {{ pillar['service-owncloud']['oc_installed'] }},
+  'ldapIgnoreNamingRules' => {{ pillar['service-owncloud']['oc_ldapIgnoreNamingRules'] }},
+  'forcessl' => {{ pillar['service-owncloud']['oc_forcessl'] }},
+  'loglevel' => '{{ pillar['service-owncloud']['oc_loglevel'] }}',
+  'maxZipInputSize' => {{ pillar['service-owncloud']['oc_maxZipInputSize'] }},
+  'allowZipDownload' => {{ pillar['service-owncloud']['oc_allowZipDownload'] }},
+  'versions' => '{{ pillar['service-owncloud']['oc_versions'] }}',
+  'dbtableprefix' => 'oc_',
+  'maintenance' => false,
+);
